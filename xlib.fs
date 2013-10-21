@@ -2,7 +2,7 @@ clear-libs
 \c #include <stdlib.h>
 c-function rand rand -- n
 
-s" X11 -L/opt/local/lib" add-lib
+s" X11 -L/opt/local/lib" add-lib  \ For OSX
 \c #include <X11/Xlib.h>
 
 \c #define XEventSize() sizeof(XEvent)
@@ -12,6 +12,7 @@ s" X11 -L/opt/local/lib" add-lib
 \c #define KeyPressMaskValue() KeyPressMask
 \c #define ButtonPressMaskValue() ButtonPressMask
 \c #define ExposeValue() Expose
+\c #define ZPixmapValue() ZPixmap
 
 \c #define XColorSize() sizeof(XColor)
 \c #define XColorPixel(c) (((XColor*)(c))->pixel)
@@ -52,6 +53,13 @@ c-function KeyPressMask KeyPressMaskValue -- n
 c-function ButtonPressMask ButtonPressMaskValue -- n
 c-function Expose ExposeValue -- n
 
+c-function XDefaultVisual XDefaultVisual a n -- a
+c-function XDefaultDepth XDefaultDepth a n -- n
+c-function XCreateImage XCreateImage a a n n n a n n n n -- a
+c-function XDestroyImage XDestroyImage a -- void
+c-function XPutImage XPutImage a n a a n n n n n n -- void
+c-function ZPixmap ZPixmapValue -- n
+c-function malloc malloc n -- a
 
 0 constant NULL
 
@@ -86,8 +94,8 @@ create xcolor XColorSize allot
 : rect ( x y w h -- )
   display @ window @ gc @ 6 roll 6 roll 6 roll 6 roll XFillRectangle ;
 
-: plot 2* swap 2* swap 2 2 rect ;
-: rect >r >r >r 2* r> 2* r> 2* r> 2* rect ;
+\ : plot 2* swap 2* swap 2 2 rect ;
+\ : rect >r >r >r 2* r> 2* r> 2* r> 2* rect ;
 
 256 constant blend
 blend 1- constant blend'
@@ -152,7 +160,37 @@ point q12' point q23' point q123'
     recurse recurse
   then
 ;
-  
+
+variable visual  display @ screen @ XDefaultVisual visual !
+variable screen-depth  display @ screen @ XDefaultDepth screen-depth !
+
+variable image
+variable image-width  variable image-height
+variable image-data
+
+: area ( w h -- )
+  image-height !  image-width !
+  image @ 0<> if image @ XDestroyImage then
+  image-width @ image-height @ * 4 * malloc image-data !
+  display @ visual @ screen-depth @ ZPixmap 0
+  image-data @ image-width @ image-height @
+  32 image-width @ 4 * XCreateImage image !
+;
+
+: blt ( -- )
+  display @ window @ gc @ image @
+  0 0 0 0 image-width @ image-height @ XPutImage
+;
+
+: setup
+  500 400 area
+  image-data @
+  image-height @ image-width @ * 4 * 0 do
+    256 random over i + c!
+  loop
+  drop
+;
+setup
 
 display @ window @ ExposureMask KeyPressMask or ButtonPressMask or XSelectInput
 : run 
@@ -176,6 +214,7 @@ display @ window @ ExposureMask KeyPressMask or ButtonPressMask or XSelectInput
       50000 0 50000 0 20000 400 quartic
       0 0 50000 0 0 500 quartic
 \      200 50 100 311 line
+      blt
     then
   again
 ;
