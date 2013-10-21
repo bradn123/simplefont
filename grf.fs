@@ -89,7 +89,7 @@ variable image-data
 
 
 ( ------------------------------------------------------------ )
-\ USED
+\ UNUSED
 
 create xcolor XColorSize allot
 
@@ -173,5 +173,3 @@ point q12' point q23' point q123'
     recurse recurse
   then
 ;
-
-
