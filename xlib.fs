@@ -75,6 +75,7 @@ create xcolor XColorSize allot
   0 xcolor XColorSetFlags
   display @ colormap @ xcolor XAllocColor 
   xcolor XColorPixel ;
+: gray ( n -- pixel ) dup dup rgb ;
 
 65535 0 0 rgb constant red
 0 65535 0 rgb constant green
@@ -82,8 +83,31 @@ create xcolor XColorSize allot
 
 : plot ( x y -- ) display @ window @ gc @ 4 roll 4 roll XDrawPoint ;
 : pen ( c -- ) display @ swap gc @ swap XSetForeground ;
-: rect ( x1 y1 x2 y2 -- )
+: rect ( x y w h -- )
   display @ window @ gc @ 6 roll 6 roll 6 roll 6 roll XFillRectangle ;
+
+: plot 2* swap 2* swap 2 2 rect ;
+: rect >r >r >r 2* r> 2* r> 2* r> 2* rect ;
+
+256 constant blend
+blend 1- constant blend'
+
+: lband ( x y -- )
+  over blend mod 65535 blend' */ gray pen
+  swap blend / swap plot
+;
+
+: rband ( x y -- )
+  over blend mod blend' swap - 65535 blend' */ gray pen
+  swap blend / 1- swap plot
+;
+
+: band ( x y w -- )
+  black pen >r 2dup swap blend / swap r> dup >r blend / 1 rect r>
+  >r 2dup swap r> + swap rband
+  lband
+;
+  
 
 ( ------------------------------------------------------------ )
 : point   create 2 cells allot ;
@@ -93,6 +117,7 @@ create xcolor XColorSize allot
 : y@ ( a -- y ) cell+ @ ;
 
 : square ( n -- n ) dup * ;
+: distance2 ( x1 y1 x2 y2 ) rot - square -rot - square + ;
 : middle ( x1 y1 x2 y2 -- mx my ) rot + 2/ >r + 2/ r> ;
 : middle' ( x1 y1 x2 y2 -- mx my ) rot + 1+ 2/ >r + 1+ 2/ r> ;
 point q1  point q2  point q3  point q12  point q23  point q123
@@ -100,16 +125,15 @@ point q12' point q23' point q123'
 : sp space ;
 : quartic ( p1 p2 p3 -- )
   q3 p! q2 p! q1 p!
-  \ q1 p@ swap . . sp q2 p@ swap . . sp q3 p@ swap . . cr
   q1 y@ q3 y@ - 0= if
-    q1 p@ q3 p@ middle plot
+    q1 p@ 2000 band
   else
     q1 p@ q2 p@ middle q12 p!
     q2 p@ q3 p@ middle q23 p!
-    q12 p@ q23 p@ middle q123 p!
     q1 p@ q2 p@ middle' q12' p!
     q2 p@ q3 p@ middle' q23' p!
-    q12 p@ q23 p@ middle' q123' p!
+    q12 p@ q23' p@ middle q123 p!
+    q12' p@ q23 p@ middle' q123' p!
     q1 p@ q12 p@ q123 p@
     q123' p@ q23' p@ q3 p@
     recurse recurse
@@ -118,8 +142,8 @@ point q12' point q23' point q123'
 
 : line ( p1 p2 -- )
   q2 p! q1 p!
-  q1 y@ q2 y@ - abs 2 < if
-    q1 x@ q2 x@ + 2/ q1 y@ plot
+  q1 p@ q2 p@ distance2 2 < if
+    q1 p@ 10 1 rect
   else
     q1 p@ q2 p@ middle q12 p!
     q1 p@ q2 p@ middle' q12' p!
@@ -135,6 +159,7 @@ display @ window @ ExposureMask KeyPressMask or ButtonPressMask or XSelectInput
   begin
     display @ event XNextEvent
     event XEventType Expose if
+(
       white pen
       0 0 500 500 rect
       green pen
@@ -145,9 +170,12 @@ display @ window @ ExposureMask KeyPressMask or ButtonPressMask or XSelectInput
       100 0 do
         500 random 500 random 50 50 rect
       loop
+)
       black pen
-      0 0 300 100 200 400 quartic
-      200 50 100 311 line
+      50000 0 0 300 20000 400 quartic
+      50000 0 50000 0 20000 400 quartic
+      0 0 50000 0 0 500 quartic
+\      200 50 100 311 line
     then
   again
 ;
