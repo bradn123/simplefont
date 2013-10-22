@@ -5,10 +5,9 @@ s" grf.fs" included
   0 0 pixel
   height 0 do
     width 0 do
-      i over 0 + c!
-      i over 1 + c!
-      i over 2 + c!
-      255 over 3 + c!
+      i 255 height 1- */ over 0 + c!
+      i 255 height 1- */ over 1 + c!
+      i 255 height 1- */ over 2 + c!
       4 +
     loop
   loop

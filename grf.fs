@@ -149,21 +149,27 @@ create last-key-buffer last-key-buffer-size allot
 ( ------------------------------------------------------------ )
 \ window ( w h -- )
 \ pixel ( x y -- a )
+\ format [b g r x]
 \ width ( -- n )
 \ height ( -- n )
 \ mouse-x ( -- n )
 \ mouse-y ( -- n )
-\ event ( -- n )
 \ last-key ( -- n )
+\ last-keysym ( -- n )
 \ flip ( -- )
 \ wait ( -- )
+\ poll ( -- )
+\ event ( -- n )
 \
-\ expose-event ( -- n ) 256 
+\ motion-event ( -- n ) 0
+\ expose-event ( -- n ) 1024
+\ resize-event ( -- n ) 1025
+\ timeout-event ( -- n ) 1026
+\ unknown-event ( -- n ) 1027
 \ 32 thru 126 keydown
 \ -32 thru -126 keyup
 \ 1 thru 3 mousedown
 \ -1 thru -3 mouseup
-\ 0 mousemove
 
 ( ------------------------------------------------------------ )
 
