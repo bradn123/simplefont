@@ -15,21 +15,21 @@ create xevent XEventSize allot
 variable window-handle
 variable gc
 
+ExposureMask
+ButtonPressMask or
+ButtonReleaseMask or
+KeyPressMask or
+KeyReleaseMask or
+PointerMotionMask or
+StructureNotifyMask or constant event-mask
+
 : window ( w h -- )
   >r >r
   display @ dup 0 RootWindow 1 1 r> r> 0 black white
   XCreateSimpleWindow window-handle !
   display @ window-handle @ XMapWindow
   display @ window-handle @ 0 NULL XCreateGC gc !
-  display @ window-handle @
-  ExposureMask
-  ButtonPressMask or
-  ButtonReleaseMask or
-  KeyPressMask or
-  KeyReleaseMask or
-  PointerMotionMask or
-  StructureNotifyMask or
-  XSelectInput
+  display @ window-handle @ event-mask XSelectInput
 ;
 
 variable image
@@ -56,8 +56,11 @@ variable image-data
   \ display @ XFlush
 ;
 
+0 constant motion-event
 1024 constant expose-event
 1025 constant resize-event
+1026 constant timeout-event
+1027 constant unknown-event
 
 variable mouse-position-x
 variable mouse-position-y
@@ -72,22 +75,24 @@ variable mouse-position-y
 
 variable last-event
 variable last-keysym-value
-80 constant key-buffer-size
-variable key-buffer-length
-create key-buffer key-buffer-size allot
+80 constant last-key-buffer-size
+variable last-key-buffer-length
+create last-key-buffer last-key-buffer-size allot
 
 : event ( -- n ) last-event @ ;
 : last-keysym ( -- n ) last-keysym-value @ ;
-: last-key ( -- a n ) key-buffer key-buffer-length @ ;
+: last-keys ( -- a n ) last-key-buffer last-key-buffer-length @ ;
+: last-key ( -- a n ) last-keys 0> if c@ else drop 0 then ;
 
 : update-keys
   xevent XEventKeyCode last-event !
-  xevent XEventKeyEvent key-buffer key-buffer-size
-  last-keysym-value NULL XLookupString key-buffer-length !
+  xevent XEventKeyEvent last-key-buffer last-key-buffer-size
+  last-keysym-value NULL XLookupString last-key-buffer-length !
 ;
 
-: wait ( -- )
-  display @ xevent XNextEvent
+-1 constant forever
+
+: update-last-event ( -- )
   xevent XEventType Expose = if
      expose-event last-event !
      exit
@@ -120,11 +125,26 @@ create key-buffer key-buffer-size allot
   then
   xevent XEventType MotionNotify = if
     update-mouse
-    0 last-event !
+    motion-event last-event !
     exit
   then
-  0 last-event !
+  unknown-event last-event !
 ;
+
+: wait ( -- )
+  display @ xevent XNextEvent
+  update-last-event
+;
+
+: poll ( -- )
+  display @ event-mask xevent XCheckMaskEvent
+  0= if
+    timeout-event last-event !
+  else
+    update-last-event
+  then
+;
+
 
 ( ------------------------------------------------------------ )
 \ window ( w h -- )
