@@ -1,4 +1,6 @@
 s" grf.fs" included
+s" font.fs" included
+s" gimple1.fs" included
 ( ------------------------------------------------------------ )
 
 : draw
@@ -19,7 +21,10 @@ s" grf.fs" included
   begin
     poll
     event expose-event = if
-      draw
+      \ draw
+      clear
+      100 100 300 100 300 300 quartic
+      100 100 100 300 300 300 quartic
       flip
     then
     event 0= if

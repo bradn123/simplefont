@@ -191,24 +191,3 @@ create xevent XEventSize allot
     update-last-event
   then
 ;
-
-( ------------------------------------------------------------ )
-( UNUSED )
-
-create xcolor XColorSize allot
-
-: rgb ( r g b -- pixel )
-  xcolor XColorSetBlue
-  xcolor XColorSetGreen
-  xcolor XColorSetRed
-  0 xcolor XColorSetFlags
-  display @ colormap @ xcolor XAllocColor 
-  xcolor XColorPixel ;
-: gray ( n -- pixel ) dup dup rgb ;
-
-: plot ( x y -- )
-  display @ window-handle @ gc @ 4 roll 4 roll XDrawPoint ;
-: pen ( c -- ) display @ swap gc @ swap XSetForeground ;
-: rect ( x y w h -- )
-  display @ window-handle @ gc @
-  6 roll 6 roll 6 roll 6 roll XFillRectangle ;
