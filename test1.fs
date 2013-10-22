@@ -1,15 +1,13 @@
 s" grf.fs" included
 ( ------------------------------------------------------------ )
 
-variable phase
-
 : draw
   0 0 pixel
   height 0 do
     width 0 do
-      phase @ i + over 0 + c!
+      i over 0 + c!
       j over 1 + c!
-      phase @ i + j * over 2 + c!
+      i j * over 2 + c!
       255 over 3 + c!
       4 +
     loop
@@ -20,15 +18,16 @@ variable phase
 : test1
   640 480 window
   begin
-    event dup expose-event = if
-      begin
-        draw
-        1 phase +!
-        flip
-      again
-    else
+    wait
+    event expose-event = if
+      draw
+      flip
     then
-    drop
+    event 0= if
+      \ move mouse
+    else
+      event . mouse-x . mouse-y . last-keysym . ." |" last-key type ." |" cr
+    then
   again
 ;
 test1

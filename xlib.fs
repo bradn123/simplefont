@@ -18,17 +18,43 @@ c-function XEventType XEventType a -- n
 c-function XEventConfigureWidth XEventConfigureWidth a -- n
 \c #define XEventConfigureHeight(e) (((XEvent*)(e))->xconfigure.height)
 c-function XEventConfigureHeight XEventConfigureHeight a -- n
+\c #define XEventKeyEvent(e) (&((XEvent*)(e))->xkey)
+c-function XEventKeyEvent XEventKeyEvent a -- a
+\c #define XEventKeycode(e) (((XEvent*)(e))->xkey.keycode)
+c-function XEventKeycode XEventKeycode a -- n
+\c #define XEventButton(e) (((XEvent*)(e))->xbutton.button)
+c-function XEventButton XEventButton a -- n
+\c #define XEventX(e) (((XEvent*)(e))->xmotion.x)
+c-function XEventX XEventX a -- n
+\c #define XEventY(e) (((XEvent*)(e))->xmotion.y)
+c-function XEventY XEventY a -- n
 
+\c #define ButtonPressValue() ButtonPress
+c-function ButtonPress ButtonPressValue -- n
 \c #define ButtonPressMaskValue() ButtonPressMask
 c-function ButtonPressMask ButtonPressMaskValue -- n
+\c #define ButtonReleaseValue() ButtonRelease
+c-function ButtonRelease ButtonReleaseValue -- n
+\c #define ButtonReleaseMaskValue() ButtonReleaseMask
+c-function ButtonReleaseMask ButtonReleaseMaskValue -- n
 \c #define ConfigureNotifyValue() ConfigureNotify
 c-function ConfigureNotify ConfigureNotifyValue -- n
 \c #define ExposeValue() Expose
 c-function Expose ExposeValue -- n
 \c #define ExposureMaskValue() ExposureMask
 c-function ExposureMask ExposureMaskValue -- n
+\c #define KeyPressValue() KeyPress
+c-function KeyPress KeyPressValue -- n
 \c #define KeyPressMaskValue() KeyPressMask
 c-function KeyPressMask KeyPressMaskValue -- n
+\c #define KeyReleaseValue() KeyRelease
+c-function KeyRelease KeyReleaseValue -- n
+\c #define KeyReleaseMaskValue() KeyReleaseMask
+c-function KeyReleaseMask KeyReleaseMaskValue -- n
+\c #define MotionNotifyValue() MotionNotify
+c-function MotionNotify MotionNotifyValue -- n
+\c #define PointerMotionMaskValue() PointerMotionMask
+c-function PointerMotionMask PointerMotionMaskValue -- n
 \c #define StructureNotifyMaskValue() StructureNotifyMask
 c-function StructureNotifyMask StructureNotifyMaskValue -- n
 \c #define ZPixmapValue() ZPixmap
@@ -62,6 +88,7 @@ c-function XDestroyImage XDestroyImage a -- void
 c-function XDrawPoint XDrawPoint a n a n n -- void
 c-function XFillRectangle XFillRectangle a n a n n n n -- void
 c-function XFlush XFlush a -- void
+c-function XLookupString XLookupString a a n a a -- n
 c-function XMapWindow XMapWindow a n -- void
 c-function XNextEvent XNextEvent a a -- n
 c-function XOpenDisplay XOpenDisplay a -- a

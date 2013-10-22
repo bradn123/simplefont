@@ -23,9 +23,12 @@ variable gc
   display @ window-handle @ 0 NULL XCreateGC gc !
   display @ window-handle @
   ExposureMask
-  KeyPressMask or
-  StructureNotifyMask or
   ButtonPressMask or
+  ButtonReleaseMask or
+  KeyPressMask or
+  KeyReleaseMask or
+  PointerMotionMask or
+  StructureNotifyMask or
   XSelectInput
 ;
 
@@ -45,7 +48,7 @@ variable image-data
   image-data @ image-width @ image-height @
   32 image-width @ 4 * XCreateImage image !
 ;
-1 1 image-resize
+1 1 image-resize  ( Make sure something's allocated. )
 
 : flip ( -- )
   display @ window-handle @ gc @ image @
@@ -53,19 +56,74 @@ variable image-data
   \ display @ XFlush
 ;
 
-256 constant expose-event
-257 constant resize-event
+1024 constant expose-event
+1025 constant resize-event
 
-: event ( -- n )
+variable mouse-position-x
+variable mouse-position-y
+
+: mouse-x ( -- n ) mouse-position-x @ ;
+: mouse-y ( -- n ) mouse-position-y @ ;
+
+: update-mouse ( -- )
+  xevent XEventX mouse-position-x !
+  xevent XEventY mouse-position-y !
+;
+
+variable last-event
+variable last-keysym-value
+80 constant key-buffer-size
+variable key-buffer-length
+create key-buffer key-buffer-size allot
+
+: event ( -- n ) last-event @ ;
+: last-keysym ( -- n ) last-keysym-value @ ;
+: last-key ( -- a n ) key-buffer key-buffer-length @ ;
+
+: update-keys
+  xevent XEventKeyCode last-event !
+  xevent XEventKeyEvent key-buffer key-buffer-size
+  last-keysym-value NULL XLookupString key-buffer-length !
+;
+
+: wait ( -- )
   display @ xevent XNextEvent
-  xevent XEventType Expose = if expose-event exit then
+  xevent XEventType Expose = if
+     expose-event last-event !
+     exit
+  then
   xevent XEventType ConfigureNotify = if
     xevent XEventConfigureWidth
     xevent XEventConfigureHeight image-resize
-    resize-event
+    resize-event last-event !
     exit
   then
-  0
+  xevent XEventType KeyPress = if
+    update-mouse
+    update-keys
+    exit
+  then
+  xevent XEventType KeyRelease = if
+    update-mouse
+    update-keys
+    exit
+  then
+  xevent XEventType ButtonPress = if
+    update-mouse
+    xevent XEventButton last-event ! ( uses carnal knowlege )
+    exit
+  then
+  xevent XEventType ButtonRelease = if
+    update-mouse
+    xevent XEventButton negate last-event ! ( uses carnal knowlege )
+    exit
+  then
+  xevent XEventType MotionNotify = if
+    update-mouse
+    0 last-event !
+    exit
+  then
+  0 last-event !
 ;
 
 ( ------------------------------------------------------------ )
@@ -75,8 +133,10 @@ variable image-data
 \ height ( -- n )
 \ mouse-x ( -- n )
 \ mouse-y ( -- n )
+\ event ( -- n )
+\ last-key ( -- n )
 \ flip ( -- )
-\ event ( -- n)
+\ wait ( -- )
 \
 \ expose-event ( -- n ) 256 
 \ 32 thru 126 keydown
