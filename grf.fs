@@ -1,6 +1,49 @@
 s" xlib.fs" included
 
 ( ------------------------------------------------------------ )
+( Public interface )
+
+\ Startup:
+\   window ( w h -- )
+\ Drawing region:
+\   pixel ( x y -- a ) (format [b g r x])
+\   width ( -- n )
+\   height ( -- n )
+\   flip ( -- )
+\ Getting events:
+\   wait ( -- )
+\   poll ( -- )
+\ Event info:
+\   mouse-x ( -- n )
+\   mouse-y ( -- n )
+\   last-key ( -- n )
+\   last-keysym ( -- n )
+\   event ( -- n )
+\ Event constants:
+\   motion-event
+\   expose-event
+\   resize-event
+\   timeout-event
+\   unknown-event
+\   32 thru 126 keydown
+\   -32 thru -126 keyup
+\   1 thru 3 mousedown
+\   -1 thru -3 mouseup
+
+
+( ------------------------------------------------------------ )
+( Public event constants )
+
+0 constant motion-event
+1024 constant expose-event
+1025 constant resize-event
+1026 constant timeout-event
+1027 constant unknown-event
+
+
+( ------------------------------------------------------------ )
+( Globals for display and visuals )
+
 variable display  NULL XOpenDisplay display !
 variable screen  display @ DefaultScreen screen !
 variable colormap  display @ screen @ DefaultColorMap colormap !
@@ -10,10 +53,9 @@ variable screen-depth  display @ screen @
 display @ screen @ BlackPixel constant black
 display @ screen @ WhitePixel constant white
 
-create xevent XEventSize allot
 
-variable window-handle
-variable gc
+( ------------------------------------------------------------ )
+( Window creation )
 
 ExposureMask
 ButtonPressMask or
@@ -23,6 +65,9 @@ KeyReleaseMask or
 PointerMotionMask or
 StructureNotifyMask or constant event-mask
 
+variable window-handle
+variable gc
+
 : window ( w h -- )
   >r >r
   display @ dup 0 RootWindow 1 1 r> r> 0 black white
@@ -31,6 +76,10 @@ StructureNotifyMask or constant event-mask
   display @ window-handle @ 0 NULL XCreateGC gc !
   display @ window-handle @ event-mask XSelectInput
 ;
+
+
+( ------------------------------------------------------------ )
+( Image handling )
 
 variable image
 variable image-width  variable image-height
@@ -56,41 +105,39 @@ variable image-data
   \ display @ XFlush
 ;
 
-0 constant motion-event
-1024 constant expose-event
-1025 constant resize-event
-1026 constant timeout-event
-1027 constant unknown-event
 
+( ------------------------------------------------------------ )
+( Event handling )
+
+( Keyboard )
+80 constant last-key-buffer-size
+create last-key-buffer last-key-buffer-size allot
+variable last-key-buffer-length
+variable last-keysym-value
+( Mouse )
 variable mouse-position-x
 variable mouse-position-y
+( Event )
+variable last-event
+create xevent XEventSize allot
 
 : mouse-x ( -- n ) mouse-position-x @ ;
 : mouse-y ( -- n ) mouse-position-y @ ;
+: event ( -- n ) last-event @ ;
+: last-keysym ( -- n ) last-keysym-value @ ;
+: last-keys ( -- a n ) last-key-buffer last-key-buffer-length @ ;
+: last-key ( -- a n ) last-keys 0> if c@ else drop 0 then ;
 
 : update-mouse ( -- )
   xevent XEventX mouse-position-x !
   xevent XEventY mouse-position-y !
 ;
 
-variable last-event
-variable last-keysym-value
-80 constant last-key-buffer-size
-variable last-key-buffer-length
-create last-key-buffer last-key-buffer-size allot
-
-: event ( -- n ) last-event @ ;
-: last-keysym ( -- n ) last-keysym-value @ ;
-: last-keys ( -- a n ) last-key-buffer last-key-buffer-length @ ;
-: last-key ( -- a n ) last-keys 0> if c@ else drop 0 then ;
-
 : update-keys
   xevent XEventKeyCode last-event !
   xevent XEventKeyEvent last-key-buffer last-key-buffer-size
   last-keysym-value NULL XLookupString last-key-buffer-length !
 ;
-
--1 constant forever
 
 : update-last-event ( -- )
   xevent XEventType Expose = if
@@ -145,37 +192,8 @@ create last-key-buffer last-key-buffer-size allot
   then
 ;
 
-
 ( ------------------------------------------------------------ )
-\ window ( w h -- )
-\ pixel ( x y -- a )
-\ format [b g r x]
-\ width ( -- n )
-\ height ( -- n )
-\ mouse-x ( -- n )
-\ mouse-y ( -- n )
-\ last-key ( -- n )
-\ last-keysym ( -- n )
-\ flip ( -- )
-\ wait ( -- )
-\ poll ( -- )
-\ event ( -- n )
-\
-\ motion-event ( -- n ) 0
-\ expose-event ( -- n ) 1024
-\ resize-event ( -- n ) 1025
-\ timeout-event ( -- n ) 1026
-\ unknown-event ( -- n ) 1027
-\ 32 thru 126 keydown
-\ -32 thru -126 keyup
-\ 1 thru 3 mousedown
-\ -1 thru -3 mouseup
-
-( ------------------------------------------------------------ )
-
-
-( ------------------------------------------------------------ )
-\ UNUSED
+( UNUSED )
 
 create xcolor XColorSize allot
 
@@ -194,68 +212,3 @@ create xcolor XColorSize allot
 : rect ( x y w h -- )
   display @ window-handle @ gc @
   6 roll 6 roll 6 roll 6 roll XFillRectangle ;
-
-( ------------------------------------------------------------ )
-256 constant blend
-blend 1- constant blend'
-
-: lband ( x y -- )
-  over blend mod 65535 blend' */ gray pen
-  swap blend / swap plot
-;
-
-: rband ( x y -- )
-  over blend mod blend' swap - 65535 blend' */ gray pen
-  swap blend / 1- swap plot
-;
-
-: band ( x y w -- )
-  black pen >r 2dup swap blend / swap r> dup >r blend / 1 rect r>
-  >r 2dup swap r> + swap rband
-  lband
-;
-  
-
-( ------------------------------------------------------------ )
-: point   create 2 cells allot ;
-: p! ( x y a -- ) swap over cell+ ! ! ;
-: p@ ( a -- x y ) dup @ swap cell+ @ ;
-: x@ ( a -- x ) @ ;
-: y@ ( a -- y ) cell+ @ ;
-
-: square ( n -- n ) dup * ;
-: distance2 ( x1 y1 x2 y2 ) rot - square -rot - square + ;
-: middle ( x1 y1 x2 y2 -- mx my ) rot + 2/ >r + 2/ r> ;
-: middle' ( x1 y1 x2 y2 -- mx my ) rot + 1+ 2/ >r + 1+ 2/ r> ;
-point q1  point q2  point q3  point q12  point q23  point q123
-point q12' point q23' point q123'
-: sp space ;
-: quartic ( p1 p2 p3 -- )
-  q3 p! q2 p! q1 p!
-  q1 y@ q3 y@ - 0= if
-    q1 p@ 2000 band
-  else
-    q1 p@ q2 p@ middle q12 p!
-    q2 p@ q3 p@ middle q23 p!
-    q1 p@ q2 p@ middle' q12' p!
-    q2 p@ q3 p@ middle' q23' p!
-    q12 p@ q23' p@ middle q123 p!
-    q12' p@ q23 p@ middle' q123' p!
-    q1 p@ q12 p@ q123 p@
-    q123' p@ q23' p@ q3 p@
-    recurse recurse
-  then 
-;
-
-: line ( p1 p2 -- )
-  q2 p! q1 p!
-  q1 p@ q2 p@ distance2 2 < if
-    q1 p@ 10 1 rect
-  else
-    q1 p@ q2 p@ middle q12 p!
-    q1 p@ q2 p@ middle' q12' p!
-    q1 p@ q12 p@
-    q12 p@ q2 p@
-    recurse recurse
-  then
-;
