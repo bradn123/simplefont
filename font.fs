@@ -76,13 +76,14 @@ variable font-height   40 font-height !
 : char-start ( n -- a ) char-offset font @ swap 0 ?do char-skip loop ;
 : stroke-code ( n -- c ) 127 and ;
 : stroke-x ( n -- x ) 10 /   2 - font-width @ 3 */ font-x @ + ;
-: stroke-y ( n -- y ) 10 mod 2 - font-height @ 5 */ negate font-y @ + ;
+: stroke-y ( n -- y ) 10 mod 2 - font-height @ 6 */ negate font-y @ + ;
 : stroke-pt ( n -- x y ) stroke-code dup stroke-x swap stroke-y ;
 : stroke-draw ( a -- )
   dup c@ stroke-pt rot
   dup 1+ c@ stroke-pt rot
       2 + c@ stroke-pt quartic ;
-: char-draw ( n -- ) char-start begin dup c@ char-end? 0= while
+: char-draw ( n -- ) dup 33 < over 126 > or if exit then
+                     char-start begin dup c@ char-end? 0= while
                        dup stroke-draw 3 + repeat stroke-draw
                        font-width @ font-x +! ;
 

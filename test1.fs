@@ -3,30 +3,30 @@ s" font.fs" included
 s" gimple1.fs" included
 ( ------------------------------------------------------------ )
 
-variable x  33 x !
+: draw
+  clear
+  gimple1 font !
+  30 font-width !  60 font-height !
+  8 0 do
+    10 font-x !
+    40 font-height @ i * + font-y !
+    32 0 do j 32 * i + char-draw loop
+  loop
+  flip
+;
 
 : test1
   640 480 window
   begin
     poll
     event expose-event = if
-      clear
-\      100 100 300 100 300 300 quartic
-\      100 100 100 300 300 300 quartic
-      flip
+      draw
     then
     event 0= if
       \ move mouse
     else event timeout-event = if
       100 ms
     else event 1 = if
-      clear
-      gimple1 font !
-      100 font-x !
-      500 font-y !
-      x @ dup 30 + swap do i char-draw loop
-      flip
-      1 x +!
     else
       \ event . mouse-x . mouse-y . last-keysym . last-key emit cr
     then then then
