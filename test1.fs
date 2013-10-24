@@ -22,8 +22,9 @@ variable x  33 x !
     else event 1 = if
       clear
       gimple1 font !
-      0 font-x !
-      x @ dup 5 + swap do i char-draw loop
+      100 font-x !
+      500 font-y !
+      x @ dup 30 + swap do i char-draw loop
       flip
       1 x +!
     else
