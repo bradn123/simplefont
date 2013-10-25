@@ -22,23 +22,24 @@ granual square constant granual2
 : g>> ( p -- p' ) granularity p-rshift ;
 : g<< ( p -- p' ) granularity p-lshift ;
 
-variable weight  1 weight !
+variable <>weight  variable (weight
+: font-weight ( n -- )
+  dup (weight !  granularity rshift 2 + <>weight ! ;
+300 font-weight
+: <->weight ( -- n -n ) <>weight @ 1+ <>weight @ negate ;
 
 : clear ( -- ) 0 0 pixel width height * 4 * 255 fill ;
 : byte-clip ( n -- n ) 0 max 255 min ;
-: pattern ( x y -- ) plen2 sqrt weight @ granularity lshift - byte-clip ;
+: pattern ( x y -- ) plen2 sqrt (weight @ - byte-clip ;
 : blend1 ( v a -- ) dup c@ rot min swap c! ;
 : blend ( v a -- ) 2dup blend1 2dup 1+ blend1 2 + blend1 ;
 point pt  point ptg
 : penplot ( x y -- )
   pt p!  pt p@ g>> ptg p!
-  weight @ 2 + weight @ negate 1- do
-    weight @ 2 + weight @ negate 1- do
-      pt p@ ptg p@ i j p+ 2dup pixel >r
-      g<< p- pattern r> blend
-    loop
-  loop
-;
+  <->weight do <->weight do
+    pt p@ ptg p@ i j p+ 2dup pixel >r
+    g<< p- pattern r> blend
+  loop loop ;
 
 ( ------------------------------------------------------------ )
 point q1  point q2  point q3  point q12  point q23  point q123
