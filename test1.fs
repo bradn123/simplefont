@@ -6,11 +6,13 @@ s" gimple1.fs" included
 : draw
   clear
   gimple1 font !
-  20 font-width !  40 font-height !
+  10 font-width !  20 font-height !
   font-margin @ font-x !  font-height @ font-y !
-  10 1 do 
-    i 50 * font-weight
+  10 0 do
+    i 50 * 3 + font-weight
     126 33 do i font-emit loop
+    font-cr
+    s" The quick brown fox jumped over the lazy dog." font-type
     font-cr
   loop
   flip

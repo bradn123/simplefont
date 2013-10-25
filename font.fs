@@ -50,7 +50,7 @@ point pt  point ptg
 point q1  point q2  point q3  point q12  point q23  point q123
 : quartic' ( p1 p2 p3 -- )
   q3 p! q2 p! q1 p!
-  q1 p@ q3 p@ distance2 granual2 2/ < if
+  q1 p@ q3 p@ distance2 granual2 < if
     q1 p@ q3 p@ middle penplot
   else
     q1 p@ q2 p@ middle q12 p!
