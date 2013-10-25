@@ -1,42 +1,47 @@
 ( ------------------------------------------------------------ )
-
+( Tools )
 : square ( n -- n ) dup * ;
 : sqrt ( n -- n ) s>f fsqrt f>s ;
-
-8 constant granularity
-1 granularity lshift constant granual
-granual square constant granual2
-
-variable weight  2 granularity lshift weight !
-
-
-: clear ( -- ) 0 0 pixel width height * 4 * 255 fill ;
-: byte-clip ( n -- n ) 0 max 255 min ;
-: pattern ( x y -- )
-  square swap square + sqrt weight @ granual - - byte-clip ;
-: blend1 ( v a -- ) dup c@ rot min swap c! ;
-: blend ( v a -- ) 2dup blend1 2dup 1+ blend1 2 + blend1 ;
-: penplot ( x y -- )
-  weight @ 1+ weight @ negate do
-    weight @ 1+ weight @ negate do
-      2dup j + granularity rshift swap
-           i + granularity rshift swap pixel
-      i j pattern swap blend
-    granual +loop
-  granual +loop
-  2drop
-;
-
-( ------------------------------------------------------------ )
 : point   create 2 cells allot ;
 : p! ( x y a -- ) swap over cell+ ! ! ;
 : p@ ( a -- x y ) dup @ swap cell+ @ ;
+: p+ ( p1 p2 -- p1+p2 ) rot + -rot + swap ;
+: p- ( p1 p2 -- p1-p2 ) rot swap - -rot - swap ;
+: plen2 ( p -- n ) square swap square + ;
+: distance2 ( p1 p2 -- n ) p- plen2 ;
+: p-rshift ( p n -- p' ) dup >r rshift swap r> rshift swap ;
+: p-lshift ( p n -- p' ) dup >r lshift swap r> lshift swap ;
+: middle ( p1 p2 -- pm ) p+ 1 p-rshift ;
 
-: distance2 ( x1 y1 x2 y2 ) rot - square -rot - square + ;
-: middle ( x1 y1 x2 y2 -- mx my ) rot + 2/ >r + 2/ r> ;
 
+( ------------------------------------------------------------ )
+( Pen plotting )
+8 constant granularity
+1 granularity lshift constant granual
+granual square constant granual2
+: g>> ( p -- p' ) granularity p-rshift ;
+: g<< ( p -- p' ) granularity p-lshift ;
+
+variable weight  1 weight !
+
+: clear ( -- ) 0 0 pixel width height * 4 * 255 fill ;
+: byte-clip ( n -- n ) 0 max 255 min ;
+: pattern ( x y -- ) plen2 sqrt weight @ granularity lshift - byte-clip ;
+: blend1 ( v a -- ) dup c@ rot min swap c! ;
+: blend ( v a -- ) 2dup blend1 2dup 1+ blend1 2 + blend1 ;
+point pt  point ptg
+: penplot ( x y -- )
+  pt p!  pt p@ g>> ptg p!
+  weight @ 2 + weight @ negate 1- do
+    weight @ 2 + weight @ negate 1- do
+      pt p@ ptg p@ i j p+ 2dup pixel >r
+      g<< p- pattern r> blend
+    loop
+  loop
+;
+
+( ------------------------------------------------------------ )
 point q1  point q2  point q3  point q12  point q23  point q123
-
 : quartic' ( p1 p2 p3 -- )
   q3 p! q2 p! q1 p!
   q1 p@ q3 p@ distance2 granual2 2/ < if
@@ -51,11 +56,7 @@ point q1  point q2  point q3  point q12  point q23  point q123
   then 
 ;
 : quartic ( p1 p2 p3 -- )
-  granularity lshift >r granularity lshift >r granularity lshift >r
-  granularity lshift >r granularity lshift >r granularity lshift >r 
-  r> r> r> r> r> r>
-  quartic'
-;
+  g<< >r >r g<< >r >r g<< r> r> r> r> quartic' ;
 
 ( ------------------------------------------------------------ )
 ( Font definition tools )
@@ -63,10 +64,8 @@ point q1  point q2  point q3  point q12  point q23  point q123
 : /,   dup 10000 / 100 mod c,
        dup 100 / 100 mod c,
        100 mod c, ;
-variable font
-variable font-x
-variable font-y
-variable font-width  20 font-width !
+variable font  variable font-x  variable font-y
+variable font-width    20 font-width !
 variable font-height   40 font-height !
 33 constant min-character  126 constant max-character
 : char-clip ( n -- n ) min-character max max-character min ;
