@@ -118,13 +118,14 @@ variable font-height   40 font-height !
   dup c@ stroke-pt rot
   dup 1+ c@ stroke-pt rot
       2 + c@ stroke-pt quartic ;
-
-
-( ------------------------------------------------------------ )
-( Decoding each character stroke )
 : font-draw1 ( n -- )
   char-start begin dup c@ char-end? 0= while
   dup stroke-draw 3 + repeat stroke-draw ;
+
+
+( ------------------------------------------------------------ )
+( Text position handling )
+: font-cr  font-margin @ font-x ! font-height @ font-y +! ;
 
 : char-next   font-width @ font-x +!
   font-x @ font-width @ + width font-margin @ - >
@@ -133,7 +134,6 @@ variable font-height   40 font-height !
 
 ( ------------------------------------------------------------ )
 ( Typing and control codes )
-: font-cr  font-margin @ font-x ! font-height @ font-y +! ;
 
 : font-emit ( n -- )
   dup 10 = if drop font-cr exit then
