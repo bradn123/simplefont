@@ -6,11 +6,12 @@ s" gimple1.fs" included
 : draw
   clear
   gimple1 font !
-  30 font-width !  60 font-height !
-  8 0 do
-    10 font-x !
-    40 font-height @ i * + font-y !
-    32 0 do j 32 * i + char-draw loop
+  20 font-width !  40 font-height !
+  font-margin @ font-x !  font-height @ font-y !
+  10 1 do 
+    i 50 * font-weight
+    126 33 do i font-emit loop
+    font-cr
   loop
   flip
 ;
@@ -28,7 +29,7 @@ s" gimple1.fs" included
       100 ms
     else event 1 = if
     else
-      \ event . mouse-x . mouse-y . last-keysym . last-key emit cr
+      event . mouse-x . mouse-y . last-keysym . last-key emit cr
     then then then
   again
 ;

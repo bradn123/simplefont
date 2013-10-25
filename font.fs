@@ -11,7 +11,7 @@
 : distance2 ( p1 p2 -- n ) p- plen2 ;
 : p-rshift ( p n -- p' ) dup >r rshift swap r> rshift swap ;
 : p-lshift ( p n -- p' ) dup >r lshift swap r> lshift swap ;
-: middle ( p1 p2 -- pm ) p+ 1 p-rshift ;
+: middle ( p1 p2 -- pm ) rot + 2/ -rot + 2/ swap ;
 
 
 ( ------------------------------------------------------------ )
@@ -29,6 +29,11 @@ variable <>weight  variable (weight
 : <->weight ( -- n -n ) <>weight @ 1+ <>weight @ negate ;
 
 : clear ( -- ) 0 0 pixel width height * 4 * 255 fill ;
+variable pixel-junk
+: outside? ( x y -- f )
+  2dup 0< swap 0< or >r height >= swap width >= or r> or ;
+: pixel-clip ( x y -- a )
+  2dup outside? if 2drop pixel-junk exit then pixel ;
 : byte-clip ( n -- n ) 0 max 255 min ;
 : pattern ( x y -- ) plen2 sqrt (weight @ - byte-clip ;
 : blend1 ( v a -- ) dup c@ rot min swap c! ;
@@ -37,7 +42,7 @@ point pt  point ptg
 : penplot ( x y -- )
   pt p!  pt p@ g>> ptg p!
   <->weight do <->weight do
-    pt p@ ptg p@ i j p+ 2dup pixel >r
+    pt p@ ptg p@ i j p+ 2dup pixel-clip >r
     g<< p- pattern r> blend
   loop loop ;
 
@@ -65,6 +70,7 @@ point q1  point q2  point q3  point q12  point q23  point q123
 : /,   dup 10000 / 100 mod c,
        dup 100 / 100 mod c,
        100 mod c, ;
+variable font-margin  10 font-margin !
 variable font  variable font-x  variable font-y
 variable font-width    20 font-width !
 variable font-height   40 font-height !
@@ -82,8 +88,14 @@ variable font-height   40 font-height !
   dup c@ stroke-pt rot
   dup 1+ c@ stroke-pt rot
       2 + c@ stroke-pt quartic ;
-: char-draw ( n -- ) dup 33 < over 126 > or if exit then
+: font-cr  font-margin @ font-x ! font-height @ font-y +! ;
+: char-next   font-width @ font-x +!
+  font-x @ font-width @ + width font-margin @ - > if font-cr then ;
+: font-emit ( n -- ) dup 10 = if drop font-cr exit then
+                     dup 13 = if drop font-margin @ font-x ! exit then
+                     dup 8 = if drop font-width @ negate font-x +! exit then
+                     dup 33 < over 126 > or if drop char-next exit then
                      char-start begin dup c@ char-end? 0= while
                        dup stroke-draw 3 + repeat stroke-draw
-                       font-width @ font-x +! ;
-
+                       char-next ;
+: font-type ( a n -- ) over + swap ?do i c@ font-emit loop ;

@@ -126,7 +126,7 @@ create xevent XEventSize allot
 : event ( -- n ) last-event @ ;
 : last-keysym ( -- n ) last-keysym-value @ ;
 : last-keys ( -- a n ) last-key-buffer last-key-buffer-length @ ;
-: last-key ( -- a n ) last-keys 0> if c@ else drop 0 then ;
+: last-key ( -- n ) last-keys 0> if c@ else drop 0 then ;
 
 : update-mouse ( -- )
   xevent XEventX mouse-position-x !
@@ -158,6 +158,7 @@ create xevent XEventSize allot
   xevent XEventType KeyRelease = if
     update-mouse
     update-keys
+    last-event @ negate last-event !
     exit
   then
   xevent XEventType ButtonPress = if
