@@ -98,8 +98,8 @@ variable font-height   40 font-height !
 : clear   clear-window font-margin @ dup font-x !
           font-height @ + font-y ! ;
 : char-box ( n -- )
-  font-y @ 2 + font-height @ over swap - do
-    font-x @ font-width @ over + swap do
+  font-y @ font-height @ 3 / + font-height @ over swap - do
+    font-x @ 1- font-width @ over + swap do
       i j pixel-clip over 3 swap fill
   loop loop drop ;
 
