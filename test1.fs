@@ -22,17 +22,12 @@ s" gimple1.fs" included
   640 480 window
   begin
     poll
-    event expose-event = if
-      draw
-    then
-    event 0= if
-      \ move mouse
-    else event timeout-event = if
-      100 ms
-    else event 1 = if
-    else
-      event . mouse-x . mouse-y . last-keysym . last-key emit cr
-    then then then
+    event case
+      expose-event of draw endof
+      timeout-event of 100 ms endof
+      event . mouse-x . mouse-y .
+      last-keycode . last-keysym . last-key emit cr
+    endcase
   again
 ;
 test1

@@ -29,8 +29,9 @@ granual square constant granual2
 variable <>weight  variable (weight
 : font-weight ( n -- )
   dup (weight !  granularity rshift 2 + <>weight ! ;
-300 font-weight
+100 font-weight
 : <->weight ( -- n -n ) <>weight @ 1+ <>weight @ negate ;
+: get-font-weight ( -- n ) (weight @ ;
 
 
 ( ------------------------------------------------------------ )

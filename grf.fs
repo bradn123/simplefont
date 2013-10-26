@@ -18,27 +18,24 @@ s" xlib.fs" included
 \   mouse-y ( -- n )
 \   last-key ( -- n )
 \   last-keysym ( -- n )
+\   last-keycode ( -- n )
 \   event ( -- n )
 \ Event constants:
-\   motion-event
-\   expose-event
-\   resize-event
-\   timeout-event
-\   unknown-event
-\   32 thru 126 keydown
-\   -32 thru -126 keyup
-\   1 thru 3 mousedown
-\   -1 thru -3 mouseup
+\   motion-event  expose-event  resize-event
+\   timeout-event  unknown-event
+\   press-event   release-event
 
 
 ( ------------------------------------------------------------ )
 ( Public event constants )
 
 0 constant motion-event
-1024 constant expose-event
-1025 constant resize-event
-1026 constant timeout-event
-1027 constant unknown-event
+1 constant expose-event
+2 constant resize-event
+3 constant timeout-event
+4 constant press-event
+5 constant release-event
+6 constant unknown-event
 
 
 ( ------------------------------------------------------------ )
@@ -113,6 +110,7 @@ variable image-data
 80 constant last-key-buffer-size
 create last-key-buffer last-key-buffer-size allot
 variable last-key-buffer-length
+variable last-keycode-value
 variable last-keysym-value
 ( Mouse )
 variable mouse-position-x
@@ -127,6 +125,7 @@ create xevent XEventSize allot
 : last-keysym ( -- n ) last-keysym-value @ ;
 : last-keys ( -- a n ) last-key-buffer last-key-buffer-length @ ;
 : last-key ( -- n ) last-keys 0> if c@ else drop 0 then ;
+: last-keycode ( -- n ) last-keycode-value @ ;
 
 : update-mouse ( -- )
   xevent XEventX mouse-position-x !
@@ -134,9 +133,15 @@ create xevent XEventSize allot
 ;
 
 : update-keys
-  xevent XEventKeyCode last-event !
+  xevent XEventKeyCode last-keycode-value !
   xevent XEventKeyEvent last-key-buffer last-key-buffer-size
   last-keysym-value NULL XLookupString last-key-buffer-length !
+;
+
+: mouse-key ( n -- )
+  last-keycode-value !
+  0 last-keysym-value !
+  0 last-key-buffer-length !
 ;
 
 : update-last-event ( -- )
@@ -145,35 +150,38 @@ create xevent XEventSize allot
      exit
   then
   xevent XEventType ConfigureNotify = if
+    resize-event last-event !
     xevent XEventConfigureWidth
     xevent XEventConfigureHeight image-resize
-    resize-event last-event !
     exit
   then
   xevent XEventType KeyPress = if
+    press-event last-event !
     update-mouse
     update-keys
     exit
   then
   xevent XEventType KeyRelease = if
+    release-event last-event !
     update-mouse
     update-keys
-    last-event @ negate last-event !
     exit
   then
   xevent XEventType ButtonPress = if
+    press-event last-event !
     update-mouse
-    xevent XEventButton last-event ! ( uses carnal knowlege )
+    xevent XEventButton mouse-key
     exit
   then
   xevent XEventType ButtonRelease = if
+    release-event last-event !
     update-mouse
-    xevent XEventButton negate last-event ! ( uses carnal knowlege )
+    xevent XEventButton mouse-key
     exit
   then
   xevent XEventType MotionNotify = if
-    update-mouse
     motion-event last-event !
+    update-mouse
     exit
   then
   unknown-event last-event !
