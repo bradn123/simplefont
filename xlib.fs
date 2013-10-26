@@ -9,6 +9,8 @@ c-function malloc malloc n -- a
 
 s" X11 -L/opt/local/lib" add-lib  ( For OSX )
 \c #include <X11/Xlib.h>
+\c #define XUTIL_DEFINE_FUNCTIONS
+\c #include <X11/Xutil.h>
 
 ( Accessors for members of XEvent )
 \c #define XEventSize() sizeof(XEvent)

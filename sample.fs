@@ -20,8 +20,8 @@ s" gimple1.fs" included
     [char] z of -1 font-width +! endof
     [char] s of 1 font-height +! endof
     [char] x of -1 font-height +! endof
-    [char] d of get-font-weight 10 + font-weight endof
-    [char] c of get-font-weight 10 - font-weight endof
+    [char] d of get-font-weight 50 + font-weight endof
+    [char] c of get-font-weight 50 - 1 max font-weight endof
   endcase
   draw
 ;
