@@ -74,11 +74,10 @@ point q1  point q2  point q3  point q12  point q23  point q123
     q12 p@ q23 p@ middle q123 p!
     q1 p@ q12 p@ q123 p@  q123 p@ q23 p@ q3 p@
     recurse recurse
-  then 
-;
+  then ;
 : quartic ( p1 p2 p3 -- )
   g<< >r >r g<< >r >r g<< r> r> r> r> quartic' ;
-
+: line ( p1 p2 -- ) 2dup quartic ;
 
 ( ------------------------------------------------------------ )
 ( Font definition tools )
