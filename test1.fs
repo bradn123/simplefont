@@ -9,7 +9,7 @@ s" gimple1.fs" included
   10 font-width !  20 font-height !
   font-margin @ font-x !  font-height @ font-y !
   10 0 do
-    i 50 * 3 + font-weight
+    i 50 * 3 + font-weight!
     126 33 do i font-emit loop
     font-cr
     s" The quick brown fox jumped over the lazy dog." font-type

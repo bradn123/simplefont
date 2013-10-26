@@ -27,16 +27,16 @@ granual square constant granual2
 ( ------------------------------------------------------------ )
 ( Weight of the font )
 variable <>weight  variable (weight
-: font-weight ( n -- )
+: font-weight! ( n -- )
   dup (weight !  granularity rshift 2 + <>weight ! ;
-100 font-weight
+100 font-weight!
 : <->weight ( -- n -n ) <>weight @ 1+ <>weight @ negate ;
-: get-font-weight ( -- n ) (weight @ ;
+: font-weight@ ( -- n ) (weight @ ;
 
 
 ( ------------------------------------------------------------ )
 ( Pixel handling )
-: clear ( -- ) 0 0 pixel width height * 4 * 255 fill ;
+: clear-window ( -- ) 0 0 pixel width height * 4 * 255 fill ;
 
 variable pixel-junk
 : outside? ( x y -- f )
@@ -95,6 +95,14 @@ variable font  variable font-x  variable font-y
 variable font-width    20 font-width !
 variable font-height   40 font-height !
 
+: clear   clear-window font-margin @ dup font-x !
+          font-height @ + font-y ! ;
+: char-box ( n -- )
+  font-y @ 2 + font-height @ over swap - do
+    font-x @ font-width @ over + swap do
+      i j pixel-clip over 3 swap fill
+  loop loop drop ;
+
 
 ( ------------------------------------------------------------ )
 ( Finding a character )
@@ -139,7 +147,7 @@ variable font-height   40 font-height !
 : font-emit ( n -- )
   dup 10 = if drop font-cr exit then
   dup 13 = if drop font-margin @ font-x ! exit then
-  dup 8 = if drop font-width @ negate font-x +! exit then
+  dup 8 = if drop 255 char-box font-width @ negate font-x +! exit then
   dup 33 < over 126 > or if drop char-next exit then
   font-draw1 char-next
 ;
