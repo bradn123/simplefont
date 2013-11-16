@@ -18,6 +18,7 @@ s" gimple1.fs" included
 : super-big   10 20 font-pick ;
 : big   6 30 font-pick ;
 : normal  2 44 font-pick ;
+: tiny  1 100 font-pick ;
 : bullet  10 44 font-pick font-cr s"   ~ " font-type normal ;
 : bspace font-width @ negate font-x +! ;
 : indent1  s"  " font-type ;
@@ -249,7 +250,7 @@ s" gimple1.fs" included
 : aspect-can-vary
   .title" Aspect Can Vary"
   normal
-  200 20 do normal font-width @ i 100 */ font-width !
+  180 20 do normal font-width @ i 100 */ font-width !
       ."    Percent normal: " i . bspace ." %" font-cr 15 +loop
 ;
 
@@ -273,6 +274,30 @@ s" gimple1.fs" included
 
 ( ------------------------------------------------------------ )
 
+: applications
+  .title" Applications"
+  *f" Slide shows"
+  *f" Intercept gforth console I/O"
+;
+
+( ------------------------------------------------------------ )
+
+: how-big
+  .title" How big is it?"
+  *f" Source in 64 char blockish lines:"
+  +f"   156 font.fs"
+  +f"    95 gimple1.fs"
+  +f"   206 grf.fs"
+  +f"   370 slides.fs"
+  +f"    30 terminal.fs"
+  +f"    88 xlib.fs"
+  +f"   945 total"
+  *f" ~5k of core code"
+  *f" ~512 bytes of font data"
+;
+
+( ------------------------------------------------------------ )
+
 : future
   .title" Future"
   *f" Huffman encode points?"
@@ -285,8 +310,10 @@ s" gimple1.fs" included
 
 : questions?
   .title" Questions?"
-  +f" Code online at:"
-  +f"   https://githib.com/bradn123/simplefont"
+  font-cr font-cr
+  2 50 font-pick
+  ."   Code online at:" font-cr
+  ."     https://githib.com/bradn123/simplefont" font-cr
 ;
 
 ( ------------------------------------------------------------ )
@@ -311,6 +338,8 @@ create slides
 ' aspect-can-vary ,
 ' weight-can-vary ,
 ' slant-can-vary ,
+' applications ,
+' how-big ,
 ' future ,
 ' questions? ,
 here slides - cell / constant slide-count
@@ -320,7 +349,9 @@ here slides - cell / constant slide-count
 ( Slide drawing )
 
 variable slide
-: draw   slides slide @ cells + @ clear execute flip ;
+: slide-num   tiny home height font-margin @ - font-y !
+              slide @ 1+ . ." of " slide-count . ;
+: draw   slides slide @ cells + @ clear execute slide-num flip ;
 : slide-clip   slide @ 0 max slide-count 1- min slide ! ;
 : slide-step ( n -- ) slide +! slide-clip draw ;
 : backward -1 slide-step ;
