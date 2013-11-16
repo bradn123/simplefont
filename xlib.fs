@@ -31,6 +31,8 @@ c-function XEventButton XEventButton a -- n
 c-function XEventX XEventX a -- n
 \c #define XEventY(e) (((XEvent*)(e))->xmotion.y)
 c-function XEventY XEventY a -- n
+\c #define XEventExposeCount(e) (((XEvent*)(e))->xexpose.count)
+c-function XEventExposeCount XEventExposeCount a -- n
 
 ( Various event masks and event ids )
 \c #define ButtonPressValue() ButtonPress

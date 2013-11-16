@@ -115,6 +115,8 @@ variable last-keysym-value
 ( Mouse )
 variable mouse-position-x
 variable mouse-position-y
+( Expose )
+variable expose-count-value
 ( Event )
 variable last-event
 create xevent XEventSize allot
@@ -126,6 +128,7 @@ create xevent XEventSize allot
 : last-keys ( -- a n ) last-key-buffer last-key-buffer-length @ ;
 : last-key ( -- n ) last-keys 0> if c@ else drop 0 then ;
 : last-keycode ( -- n ) last-keycode-value @ ;
+: expose-count ( -- n) expose-count-value @ ;
 
 : update-mouse ( -- )
   xevent XEventX mouse-position-x !
@@ -147,6 +150,7 @@ create xevent XEventSize allot
 : update-last-event ( -- )
   xevent XEventType Expose = if
      expose-event last-event !
+     xevent XEventExposeCount expose-count-value !
      exit
   then
   xevent XEventType ConfigureNotify = if

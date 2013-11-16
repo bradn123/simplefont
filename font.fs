@@ -95,8 +95,8 @@ variable font-width    20 font-width !
 variable font-height   40 font-height !
 variable font-slant    0 font-slant !
 
-: clear   clear-window font-margin @ dup font-x !
-          font-height @ + font-y ! ;
+: home   font-margin @ dup font-x !  font-height @ + font-y ! ;
+: clear   clear-window home ;
 : char-box ( n -- )
   font-y @ font-height @ 3 / + font-height @ over swap - do
     font-x @ 1- font-width @ over + swap do
