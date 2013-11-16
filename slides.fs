@@ -331,7 +331,7 @@ s" gimple1.fs" included
   font-cr font-cr
   2 50 font-pick
   ."   Code online at:" font-cr
-  ."     https://githib.com/bradn123/simplefont" font-cr
+  ."     https://github.com/bradn123/simplefont" font-cr
 ;
 
 ( ------------------------------------------------------------ )
