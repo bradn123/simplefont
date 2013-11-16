@@ -182,14 +182,26 @@ s" gimple1.fs" included
 : grid-x 10 + width 25 */ ;
 : grid-y 14 + height 30 */ ;
 : grid-xy swap grid-x swap 10 swap - grid-y ;
-: font-layout
+: font-layout'
   .title" Font Layout"
   *f" 7 x 10 unit layout grid"
   *f" 2 x 4 core padded for"
   +f" descenders + control"
   7 0 do i 0 grid-xy i 10 grid-xy line loop
   11 0 do 0 i grid-xy 6 i grid-xy line loop
-  big
+;
+: font-layout1
+  font-layout' big
+  2 2 grid-xy 3 9 grid-xy line
+  3 9 grid-xy 4 3 grid-xy line
+  2 3 grid-xy 4 5 grid-xy line
+  4 5 grid-xy 4 2 grid-xy line
+  20 10 font-pick
+  2 2 grid-xy 3 9 grid-xy 4 3 grid-xy quartic
+  2 3 grid-xy 4 5 grid-xy 4 2 grid-xy quartic
+;
+: font-layout2
+  font-layout' big
   4 2 grid-xy 5 6 grid-xy line
   5 6 grid-xy 2 4 grid-xy line
   4 2 grid-xy 0 2 grid-xy line
@@ -294,10 +306,10 @@ s" gimple1.fs" included
   +f"   156 font.fs"
   +f"    95 gimple1.fs"
   +f"   206 grf.fs"
-  +f"   393 slides.fs"
+  +f"   406 slides.fs"
   +f"    30 terminal.fs"
   +f"    88 xlib.fs"
-  +f"   968 total"
+  +f"   981 total"
   *f" ~5k of core code"
   *f" ~512 bytes of font data"
 ;
@@ -336,7 +348,8 @@ create slides
 ' quartic-curves-in-forth ,
 ' quartic-drawing ,
 ' anti-aliased-pen ,
-' font-layout ,
+' font-layout1 ,
+' font-layout2 ,
 ' font-format ,
 ' memory-format ,
 ' gimple1-slide ,
