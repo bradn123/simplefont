@@ -93,6 +93,7 @@ variable font-margin  10 font-margin !
 variable font  variable font-x  variable font-y
 variable font-width    20 font-width !
 variable font-height   40 font-height !
+variable font-slant    0 font-slant !
 
 : clear   clear-window font-margin @ dup font-x !
           font-height @ + font-y ! ;
@@ -117,11 +118,12 @@ variable font-height   40 font-height !
 ( ------------------------------------------------------------ )
 ( Decoding each character stroke )
 : stroke-code ( n -- c ) 127 and ;
-: stroke-x ( n -- x ) 10 /   2 - font-width @ 3 */ font-x @ + ;
-: stroke-y ( n -- y )
-  10 mod 2 - font-height @ 6 */ negate font-y @ + ;
-: stroke-pt ( n -- x y )
-  stroke-code dup stroke-x swap stroke-y ;
+: font-slant* ( x -- xs ) font-slant @ 100 */ ;
+: stroke-x' ( n -- x ) 10 / 2 - font-width @ 3 */ ;
+: stroke-y ( n -- y ) 10 mod 2 - font-height @ -6 */ ;
+: stroke-x ( n -- x ) dup stroke-x' swap stroke-y font-slant* - ;
+: stroke-pt ( n -- x y ) stroke-code dup stroke-x font-x @ +
+                                     swap stroke-y font-y @ + ;
 : stroke-draw ( a -- )
   dup c@ stroke-pt rot
   dup 1+ c@ stroke-pt rot
