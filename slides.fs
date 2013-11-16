@@ -273,7 +273,7 @@ s" gimple1.fs" included
 : slant-can-vary
   .title" Slant Can Vary"
   normal
-  110 -100 do i font-slant !
+  130 -120 do i font-slant !
       ."         Slant percent: "
       i . bspace ." %" font-cr 15 +loop
 ;
