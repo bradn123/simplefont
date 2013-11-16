@@ -228,6 +228,10 @@ s" gimple1.fs" included
 
 : gimple1-slide
   .title" Gimple1"
+  5 44 font-pick
+  ."     " 64 32 do i emit loop font-cr
+  ."     " 96 64 do i emit loop font-cr
+  ."     " 128 96 do i emit loop font-cr
   *f" Smallest nice font I could fit"
   *f" 95 visible ASCII characters"
   *f" ~9k as a TrueType font"
@@ -290,10 +294,10 @@ s" gimple1.fs" included
   +f"   156 font.fs"
   +f"    95 gimple1.fs"
   +f"   206 grf.fs"
-  +f"   370 slides.fs"
+  +f"   393 slides.fs"
   +f"    30 terminal.fs"
   +f"    88 xlib.fs"
-  +f"   945 total"
+  +f"   968 total"
   *f" ~5k of core code"
   *f" ~512 bytes of font data"
 ;
