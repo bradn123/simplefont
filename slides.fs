@@ -85,7 +85,7 @@ s" gimple1.fs" included
   +f"   wait ( -- )"
   +f"   poll ( -- )"
   +f" Event info:"
-  +f"   mouse-x ( -- n )"
+  +f"  mouse-x ( -- n )"
   +f"  mouse-y ( -- n )"
   +f"  last-key ( -- n )"
   +f"  last-keysym ( -- n )"
@@ -140,8 +140,9 @@ s" gimple1.fs" included
 : quartic-curves-in-forth
   .title" Quartic Curves in Forth"
   *f" Use fixed-point with 8-bits of fraction"
-  *f" Variable to assemble points, then fill"
-  +f" the stack before tree recursion."
+  *f" Variables to assemble points,"
+  +f" then fill the data stack before"
+  +f" recursion."
 ;
 
 ( ------------------------------------------------------------ )
@@ -248,7 +249,7 @@ s" gimple1.fs" included
 ( ------------------------------------------------------------ )
 
 : aspect-can-vary
-  .title" Aspect Can Vary"
+  .title" Aspect Ratio Can Vary"
   normal
   180 20 do normal font-width @ i 100 */ font-width !
       ."    Percent normal: " i . bspace ." %" font-cr 15 +loop
@@ -269,7 +270,8 @@ s" gimple1.fs" included
   .title" Slant Can Vary"
   normal
   110 -100 do i font-slant !
-      ."     Slant percent: " i . bspace ." %" font-cr 15 +loop
+      ."         Slant percent: "
+      i . bspace ." %" font-cr 15 +loop
 ;
 
 ( ------------------------------------------------------------ )
