@@ -12,13 +12,14 @@ s" gimple1.fs" included
 : left-type ( a n -- ) font-type font-cr ;
 : font-size! ( n -- ) width over / font-width !
                       height 2* swap / font-height ! ;
-: font-pick ( i b cols -- ) font-size!
-                            width 10 */ font-weight!
-                            50 * font-slant ! ;
-: super-big   0 5 20 font-pick ;
-: big   0 3 30 font-pick ;
-: normal  0 1 44 font-pick ;
-: bullet  0 5 44 font-pick font-cr s"   ~ " font-type normal ;
+: font-pick ( b cols -- ) font-size!
+                          width 20 */ font-weight!
+                          0 font-slant ! ;
+: super-big   10 20 font-pick ;
+: big   6 30 font-pick ;
+: normal  2 44 font-pick ;
+: bullet  10 44 font-pick font-cr s"   ~ " font-type normal ;
+: bspace font-width @ negate font-x +! ;
 : indent1  s"  " font-type ;
 : indent4  normal s"     " font-type ;
 : .f"   postpone s" postpone left-type ; immediate
@@ -52,19 +53,85 @@ s" gimple1.fs" included
 
 ( ------------------------------------------------------------ )
 
+: ground-rules
+  .title" Ground Rules"
+  *f" Use gforth"
+  *f" Wrap bitmapped graphics + events"
+  +f" in Xlib to emulate a simple raster"
+  +f" display."
+  *f" Integer math only"
+  *f" Use smallness as an artistic constraint"
+;
+
+( ------------------------------------------------------------ )
+
+: simple-graphics
+  .title" Simple Graphics"
+  +f" Startup:"
+  +f"  window ( w h -- )"
+  +f" Drawing region:"
+  +f"  pixel ( x y -- a ) (format [b g r x])"
+  +f"  width ( -- n )"
+  +f"  height ( -- n )"
+  +f"  flip ( -- )"
+;
+
+( ------------------------------------------------------------ )
+
+: simple-events
+  .title" Simple Events"
+  +f" Getting events:"
+  +f"   wait ( -- )"
+  +f"   poll ( -- )"
+  +f" Event info:"
+  +f"   mouse-x ( -- n )"
+  +f"  mouse-y ( -- n )"
+  +f"  last-key ( -- n )"
+  +f"  last-keysym ( -- n )"
+  +f"  last-keycode ( -- n )"
+  +f"  event ( -- n )"
+;
+
+( ------------------------------------------------------------ )
+
+: bezier   ."  Be" bspace 30 font-slant ! ." '"
+           0 font-slant ! ." zier" ;
 : bezier-curves
-  .title" Bezier Curves"
+  big home bezier ."  Curves" font-cr
   *f" Described by 3 or more control points"
   *f" End points are one the curve"
   *f" End segments are tangent to the curve"
+  width 3 10 */ height 6 10 */
+  width 7 10 */ height 7 10 */ line
+  width 7 10 */ height 7 10 */
+  width 3 10 */ height 8 10 */ line
+  20 10 font-pick
+  width 3 10 */ height 6 10 */
+  width 7 10 */ height 7 10 */
+  width 3 10 */ height 8 10 */ quartic
 ;
 
 ( ------------------------------------------------------------ )
 
 : de-castelijau-subdivision
   .title" De Castelijau Subdivision"
-  *f" Divide a Bezier curve in two"
+  bullet normal ." Divide a " bezier ."  curve in two" font-cr
   *f" Just + and 2/ for the middle"
+  width 3 10 */ height 6 10 */
+  width 7 10 */ height 7 10 */ line
+  width 7 10 */ height 7 10 */
+  width 3 10 */ height 8 10 */ line
+  5 10 font-pick
+  width 3 10 */ height 6 10 */
+  width 5 10 */ height 65 100 */ line
+  width 5 10 */ height 75 100 */
+  width 3 10 */ height 8 10 */ line
+  width 5 10 */ height 65 100 */
+  width 5 10 */ height 75 100 */ line
+  20 10 font-pick
+  width 3 10 */ height 6 10 */
+  width 7 10 */ height 7 10 */
+  width 3 10 */ height 8 10 */ quartic
 ;
 
 ( ------------------------------------------------------------ )
@@ -100,20 +167,34 @@ s" gimple1.fs" included
 
 ( ------------------------------------------------------------ )
 
-: font-layout
-  .title" Font Layout"
-  *f" 2 x 4 unit layout grid"
-  *f" padded for descenders + control"
-;
-
-( ------------------------------------------------------------ )
-
 : anti-aliased-pen
   .title" Anti-aliased Pen"
   *f" Draw an anti-aliased filled circle"
   *f" Blend with other circles using min/max"
   *f" Calculate distance in a window"
   +f" -> sqrt :-("
+;
+
+( ------------------------------------------------------------ )
+
+: grid-x 10 + width 25 */ ;
+: grid-y 14 + height 30 */ ;
+: grid-xy swap grid-x swap 10 swap - grid-y ;
+: font-layout
+  .title" Font Layout"
+  *f" 7 x 10 unit layout grid"
+  *f" 2 x 4 core padded for"
+  +f" descenders + control"
+  7 0 do i 0 grid-xy i 10 grid-xy line loop
+  11 0 do 0 i grid-xy 6 i grid-xy line loop
+  big
+  4 2 grid-xy 5 6 grid-xy line
+  5 6 grid-xy 2 4 grid-xy line
+  4 2 grid-xy 0 2 grid-xy line
+  0 2 grid-xy 4 4 grid-xy line
+  20 10 font-pick
+  4 2 grid-xy 5 6 grid-xy 2 4 grid-xy quartic
+  4 2 grid-xy 0 2 grid-xy 4 4 grid-xy quartic
 ;
 
 ( ------------------------------------------------------------ )
@@ -142,20 +223,97 @@ s" gimple1.fs" included
 ;
 
 ( ------------------------------------------------------------ )
+
+: gimple1-slide
+  .title" Gimple1"
+  *f" Smallest nice font I could fit"
+  *f" 95 visible ASCII characters"
+  *f" ~9k as a TrueType font"
+  *f" ~512 bytes in the current encoding"
+  *f" 2 strokes for numbers and lowercase"
+  +f" letters"
+  *f" no more then 3 strokes in any glyph"
+;
+
+( ------------------------------------------------------------ )
+
+: size-can-vary
+  .title" Size Can Vary"
+  normal
+  100 25 do i font-size!
+      ."      Chars per line: " i . font-cr 5 +loop
+;
+
+( ------------------------------------------------------------ )
+
+: aspect-can-vary
+  .title" Aspect Can Vary"
+  normal
+  200 20 do normal font-width @ i 100 */ font-width !
+      ."    Percent normal: " i . bspace ." %" font-cr 15 +loop
+;
+
+( ------------------------------------------------------------ )
+
+: weight-can-vary
+  .title" Weight Can Vary"
+  normal
+  10 0 do i 1+ dup 30 font-pick
+      ."     Weight " . font-cr loop
+;
+
+( ------------------------------------------------------------ )
+
+: slant-can-vary
+  .title" Slant Can Vary"
+  normal
+  110 -100 do i font-slant !
+      ."     Slant percent: " i . bspace ." %" font-cr 15 +loop
+;
+
+( ------------------------------------------------------------ )
+
+: future
+  .title" Future"
+  *f" Huffman encode points?"
+  *f" Support color"
+  *f" Refactor"
+  *f" Gimple2"
+;
+
+( ------------------------------------------------------------ )
+
+: questions?
+  .title" Questions?"
+  +f" Code online at:"
+  +f"   https://githib.com/bradn123/simplefont"
+;
+
+( ------------------------------------------------------------ )
 ( Slide deck )
 
 create slides
 ' title ,
 ' motivation ,
+' ground-rules ,
+' simple-graphics ,
+' simple-events ,
 ' bezier-curves ,
 ' de-castelijau-subdivision ,
 ' quartic-curves-in-forth ,
 ' quartic-drawing ,
-' font-layout ,
 ' anti-aliased-pen ,
+' font-layout ,
 ' font-format ,
 ' memory-format ,
- here slides - cell / constant slide-count
+' gimple1-slide ,
+' size-can-vary ,
+' aspect-can-vary ,
+' weight-can-vary ,
+' slant-can-vary ,
+' future ,
+' questions? ,
+here slides - cell / constant slide-count
 
 
 ( ------------------------------------------------------------ )
