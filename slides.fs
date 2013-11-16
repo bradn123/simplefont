@@ -247,7 +247,7 @@ s" gimple1.fs" included
   .title" Size Can Vary"
   normal
   100 25 do i font-size!
-      ."      Chars per line: " i . font-cr 5 +loop
+      ."     Chars per line: " i . font-cr 5 +loop
 ;
 
 ( ------------------------------------------------------------ )
