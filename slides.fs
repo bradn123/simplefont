@@ -378,10 +378,10 @@ variable slide
 
 ( ------------------------------------------------------------ )
 ( Main loop )
-131 constant left-key
-132 constant right-key
-61 constant escape-key
-57 constant space-key
+65361 constant left-key
+65363 constant right-key
+65307 constant escape-key
+32 constant space-key
 
 : slideshow
   gimple1 font !
@@ -393,7 +393,7 @@ variable slide
     event case
       expose-event of expose-count 0= if draw then endof
       press-event of
-        last-keycode case
+        last-keysym case
           left-key of backward endof
           right-key of forward endof
           space-key of forward endof
